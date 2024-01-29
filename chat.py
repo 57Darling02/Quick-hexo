@@ -1,40 +1,34 @@
-import configparser
-import tkinter as tk
-from tkinter import Button
-
-# 创建配置解析器对象
-config = configparser.ConfigParser()
-
-# 读取配置文件
-config.read('config.ini')
-
-# 创建主窗口
-root = tk.Tk()
-root.title("Button Generator")
-num = 2
-# 从配置文件中获取所有按钮信息
-for i in range(1,num+1):#btcon[0][1] text    btcon[1][1] command
-
-    btcon = config.items("Button"+str(i))
-    print(btcon[1][1])
-    button_command = eval("lambda :"+btcon[1][1])
-    button = Button(root, text=btcon[0][1], command=button_command)
-    button.pack()  # 将按钮添加到主窗口中
-# for button_info in buttons:
-#     print(button_info)
-#     print("00000")
-#     button_text = button_info[1]  # 获取按钮文本
-#     button_command = eval(button_info[1]['command'])  # 获取按钮命令，并将其转换为Python函数或方法
+# from PIL import ImageTk, Image, ImageSequence
+# def crop_top_half(image_path, save_path):
+#     # 打开图像文件
+#     image = Image.open(image_path)
+#     # 获取图像的宽度和高度
+#     width, height = image.size
+#     # 定义剪裁区域：左上角和右下角坐标
+#     # 剪裁上半部分，所以左上角的 y 坐标设为 0，右下角的 y 坐标设为原始高度的一半
+#     top_half_box = (0, 0, width, height // 2)
+#     # 对图像进行剪裁
+#     top_half_image = image.crop(top_half_box)
+#     top_half_image.save(save_path)
 #
-#     button = Button(root, text=button_text, command=button_command)  # 创建按钮并添加到主窗口中
-#     button.pack()  # 将按钮添加到主窗口中
+# # 示例用法
+# input_image_path = "assets/console.png"
+# output_image_path = "assets/close.png"
+# crop_top_half(input_image_path, output_image_path)
+import tkinter as tk
 
+root = tk.Tk()
+root.title("Truncated Label Example")
 
+# 长文本内容
+long_text = "This is a very long text that needs to be truncated if it exceeds the specified width in the GUI."
 
-    # 这里只获取了两个按钮的信息，你可以根据需要添加更多按钮
-# print(buttons)
-# 循环创建按钮并添加到主窗口中
+# 创建Label并设置anchor为"nw"，并使用ellipsis显示省略号
+label = tk.Label(root, text=long_text, anchor="nw", width=00)
+label.pack()
 
+# 其他部件
+button = tk.Button(root, text="Click me")
+button.pack()
 
-# 运行主循环，显示主窗口
 root.mainloop()
