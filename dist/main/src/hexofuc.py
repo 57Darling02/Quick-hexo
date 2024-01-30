@@ -48,6 +48,7 @@ class Hexo:
 
     def server(self):
         try:
+            self.kill_process_on_port()
             if not self.running:
                 self.running = True
                 threading.Thread(target=lambda: self.cmd_run("hexo s -p 4000")).start()
@@ -64,10 +65,12 @@ class Hexo:
         if self.running:
             if os.name == 'nt':
                 subprocess.run(['taskkill', '/F', '/T', '/PID', str(self.process.pid)], shell=True)
+                self.process.terminate()
             else:
                 self.process.terminate()
             self.serverunning = False
             self.task = "stop"
+        self.kill_process_on_port()
 
     def domore(self, command, mid_do='', final_do=''):
         if not self.running:
@@ -77,6 +80,27 @@ class Hexo:
             messagebox.showinfo("提示", '请等待上一个进程完成！')
             pass
 
+    def kill_process_on_port(self,port=4000):
+        # 查找监听指定端口的PID
+        result = subprocess.run(['netstat', '-aon'], capture_output=True, text=True)
+        lines = result.stdout.split("\n")
+        pid = None
+        for line in lines:
+            if f":{port}" in line and "LISTENING" in line:
+                parts = line.rsplit(None, 1)
+                pid = parts[-1]
+                break
+
+        # 如果找到PID，则尝试杀掉该进程
+        if pid is not None:
+            print(f"Port {port} is being used by PID {pid}, attempting to kill.")
+            try:
+                subprocess.run(['taskkill', '/F', '/PID', pid], check=True)
+                print(f"Process {pid} has been killed.")
+            except Exception as e:
+                print(f"Failed to kill process {pid}: {e}")
+        else:
+            print(f"No process is listening on port {port}.")
 
 class TooltipButton(tk.Button):
     def __init__(self, master, **kwargs):

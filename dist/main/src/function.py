@@ -213,18 +213,21 @@ class MainUI:
                 # messagebox.showinfo("err","不能不选，也别多选TwT")
                 return R
 
-        def use_editor_open(file=""):  # 使用编辑器打开文件或文件夹
-            point = get_point()
-            if point["boolean"] and point["type"] == "dir":
-                result = messagebox.askyesno("？", "是否使用编辑器打开这个文件夹？")
-                if result:
+        def use_editor_open(file_path=""):  # 使用编辑器打开文件或文件夹
+            if not file_path:
+                point = get_point()
+                if point["boolean"] and point["type"] == "dir":
+                    result = messagebox.askyesno("？", "是否使用编辑器打开这个文件夹？")
+                    if result:
+                        self.open_mdfile(point["path"])
+                    else:
+                        pass
+                elif point["boolean"]:
                     self.open_mdfile(point["path"])
                 else:
                     pass
-            elif point["boolean"]:
-                self.open_mdfile(point["path"])
             else:
-                pass
+                self.open_mdfile(file_path)
 
         def new_post(path=''):
             if not path:
@@ -362,6 +365,8 @@ class MainUI:
         setting_menu.add_command(label="选择hexo根目录", command=lambda: [self.choose_hexo_folder()])
         setting_menu.add_command(label="选择编辑器", command=lambda: self.choose_editor())
         setting_menu.add_command(label="查看控制台输出", command=lambda: self.ui.show_popup('左下角控制台信息开关\n↙↙↙↙', True, 3000))
+        setting_menu.add_command(label="右键删除自定义按钮")
+
         settingLabel = tk.Button(navigation_bar, text="setting", padx=18,
                                  compound="center", image=img["bg"], bg=navigation_bar["bg"], bd=0,
                                  activebackground=navigation_bar["bg"])
@@ -412,72 +417,77 @@ class MainUI:
         # mainframe.bind("<Configure>", lambda event: mainframe.configure(scrollregion=mainframe.bbox("all")))
         btnframe = tk.Frame(mainframe, bg=mainframe['bg'])
         mainframe.create_window((0, 0), window=btnframe, anchor="nw")
-
         def create_buttons(config):
             config = config['button_command']
-            if not config:
-                return []
             buttons = []
+            buttons.append(btn2)
+            buttons.append(btn1)
+            buttons.append(btn3)
+            if not config:
+                return buttons
+
             for key, value in config.items():
                 # 创建按钮
                 key = key.replace('\\n', '\n')
                 button = tk.Button(btnframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center",
                                    padx=10, pady=20, activebackground=mainframe["bg"],
                                    text=key, command=lambda v=value: [self.hexo.domore(v),
-                                                                      self.ui.show_popup('正在执行命令：\n' + str(v), False,
-                                                                                         False)])
+                                                                      self.ui.show_popup('正在执行命令：\n' + str(v), True,
+                                                                                    True,12000)],
+                                   wraplength=100)
                 buttons.append(button)
                 button.bind("<MouseWheel>",
                             lambda event: mainframe.yview_scroll(int(-1 * (event.delta / 120)) * 1, "units"))
+
+                button.bind('<Button-3>',lambda event,t=key.replace('\n','\\n' ): del_button(event,t))
             return buttons
 
         def place_buttons(buttons):
+
             # 摆放按钮在布局中
             row = 0
-            column = 1
+            column = 0
             for button in buttons:
                 button.grid(row=row, column=column)
+                button.bind()
                 column += 1
                 if column == 3:
                     column = 0
                     row += 1
 
-        buttons = create_buttons(self.config)
-        place_buttons(buttons)
-        btn1 = tk.Button(btnframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='尝试结束进程',
+        btn1 = tk.Button(btnframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center",
+                         text='stop all processes',
                          padx=10, pady=20,
                          activebackground=mainframe["bg"], command=lambda: [self.hexo.stop_s()])
-        btn1.grid(row=0, column=0)
         btn2 = tk.Button(btnframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='new post',
                          padx=10, pady=20,
                          activebackground=mainframe["bg"], command=lambda: [new_post()])
-        btn2.grid(row=0, column=1)
-        # btn3 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='启动服务\nhexo s', padx=10, pady=20,
-        #                  activebackground=mainframe["bg"], command=lambda :[self.hexo.server()])
-        # btn3.grid(row=0, column=2)
-        # btn4 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='推送(depoly)\nhexo d',padx=10,pady=20,
-        #                  activebackground=mainframe["bg"],command=lambda :[self.hexo.deploy()])
-        # btn4.grid(row=1, column=0)
-        # btn5 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='一键打包\ncl&&g', padx=10,
-        #                  pady=20,
-        #                  activebackground=mainframe["bg"],command=lambda :[self.hexo.domore("hexo cl&&hexo g")])
-        # btn5.grid(row=1, column=1)
-        # btn6 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='一键打包发布\ncl&&g&&d', padx=20,
-        #                  pady=20,command=lambda :[self.hexo.domore("hexo cl&&hexo g&&hexo d")],
-        #                  activebackground=mainframe["bg"])
-        # btn6.grid(row=1, column=2)
-        # btn7 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center",
-        #                  text='一键打包启动服务\ncl&&g&&s\nlocalhost:4000', padx=10,
-        #                  pady=20,command=lambda :[self.hexo.domore("hexo cl&&hexo g&&hexo s",''''''),self.hexo.set_server_running(True)],
-        #                  activebackground=mainframe["bg"])
-        # btn7.grid(row=2, column=0)
-        # btn8 = tk.Button(mainframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center",
-        #                  text='使用gulp\n压缩生成文件\nglup', padx=10,
-        #                  pady=20,command=lambda :self.hexo.domore("gulp"),
-        #                  activebackground=mainframe["bg"])
-        # btn8.grid(row=2, column=1)
-        # 生成自定义按钮？
+        btn3 = tk.Button(btnframe, image=img["bigbg"], bd=0, bg=mainframe["bg"], compound="center", text='自定义shell',
+                         padx=10, pady=20,
+                         activebackground=mainframe["bg"], command=lambda: custom_shell())
 
+        def custom_shell():
+            key = simpledialog.askstring("自定义shell", "请输入按钮名称")
+            value = simpledialog.askstring("自定义shell", "请输入cmd命令", initialvalue='hexo cl')
+            if key and value:
+                self.config.set('button_command',key,value )
+                reflash_btn()
+
+        def reflash_btn():
+            self.save()
+            self.readconfig()
+            for widget in btnframe.winfo_children():
+                widget.grid_forget()  # 清除btnFrame内部所有组件
+            buttons = create_buttons(self.config)
+            place_buttons(buttons)
+
+        def del_button(event,text):
+            if self.config.has_option('button_command', text):
+                self.config.remove_option('button_command', text)
+                reflash_btn()
+
+        buttons = create_buttons(self.config)
+        place_buttons(buttons)
         console_view = tk.Frame(view_frame, bg='red')
         console_area = self.create_scrollable_text_area(console_view, "Welcome to HEXO快速创造\n")
         console_area.place(relwidth=1, relheight=1, anchor="nw", rely=0, relx=0)
