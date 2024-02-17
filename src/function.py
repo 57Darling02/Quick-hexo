@@ -467,12 +467,12 @@ class MainUI:
                          activebackground=mainframe["bg"], command=lambda: custom_shell())
 
         def custom_shell():
-            key = simpledialog.askstring("自定义shell", "请输入按钮名称")
-            value = simpledialog.askstring("自定义shell", "请输入cmd命令", initialvalue='hexo cl')
+            key = simpledialog.askstring("自定义shell", "请输入按钮名称",parent=self.root)
+            value = simpledialog.askstring("自定义shell", "请输入cmd命令", initialvalue='hexo cl',parent=self.root)
             if key and value:
                 self.config.set('button_command',key,value )
                 reflash_btn()
-
+            update_scroll_region()
         def reflash_btn():
             self.save()
             self.readconfig()
@@ -485,6 +485,7 @@ class MainUI:
             if self.config.has_option('button_command', text):
                 self.config.remove_option('button_command', text)
                 reflash_btn()
+            update_scroll_region()
 
         buttons = create_buttons(self.config)
         place_buttons(buttons)

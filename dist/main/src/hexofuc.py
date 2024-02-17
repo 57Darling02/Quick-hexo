@@ -65,7 +65,7 @@ class Hexo:
         if self.running:
             if os.name == 'nt':
                 subprocess.run(['taskkill', '/F', '/T', '/PID', str(self.process.pid)], shell=True)
-                self.process.terminate()
+                # self.process.terminate()
             else:
                 self.process.terminate()
             self.serverunning = False
