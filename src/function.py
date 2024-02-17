@@ -103,7 +103,7 @@ class MainUI:
         self.hexo_folder_path = ""
         self.model_content = ""
         self.hexo_folder_root_path = ""
-        self.help_url = "57d02.cn"
+        self.help_url = "https://57d02.cn/2024/02/17/hexo%E5%BF%AB%E9%80%9F%E5%88%9B%E4%BD%9C%E6%8C%87%E5%8D%97/"
         self.Author_URI = "57d02.cn"
         self.hexo = None
         # 初始化配置读取
